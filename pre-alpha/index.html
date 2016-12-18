@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+    <title>Phaser - Making your first game, part 4</title>
+	<script type="text/javascript" src="build/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+var game = new Phaser.Game(1024, 768, Phaser.AUTO, '', { preload: preload, create: create, update: update, render: render });
+
+function preload() {
+	game.load.image('back', 'assets/background.png');
+	game.load.image('ground', 'assets/platform.png');
+	game.load.image('tree', 'assets/tree.png');
+	game.load.image('rogue', 'assets/rogue.png');
+	game.load.spritesheet('bear', 'assets/bear.png', 290, 285, 3);
+	game.load.image('cloud', 'assets/cloud.png');
+	game.load.image('don', 'assets/don.png');
+	game.load.image('love', 'assets/love.png');
+	game.load.image('life', 'assets/life.png');
+	game.load.spritesheet('boom', 'assets/booom.png', 100, 100, 63);
+	game.load.audio('explosion', 'assets/explosion.wav');
+	game.load.audio('inception', 'assets/inception.mp3');
+}
+
+var player;
+var platform;
+var cursors;
+var bear;
+var explosion;
+
+function create() {
+	game.physics.startSystem(Phaser.Physics.ARCADE);
+	game.world.setBounds(0, 0, 3000, 768);
+
+	game.add.sprite(0, 0, 'back');
+	game.add.sprite(260, game.world.height - 500, 'tree');
+
+
+	platform = game.add.group();
+
+	platform.enableBody = true;
+
+	var ground = platform.create(0, game.world.height - 64, 'ground');
+
+	ground.scale.setTo(7.5, 2);
+
+	ground.body.immovable = true;
+
+	explosion = game.add.audio('explosion');
+	inception = game.add.audio('inception');
+
+	bear = game.add.sprite(2700, game.world.height - 400, 'bear');
+	game.physics.arcade.enable(bear);
+	bear.body.gravity.y = 600;
+  bear.body.collideWorldBounds = true;
+	bear.animations.add('fak', [0,1,2], 10);
+
+
+
+	player = game.add.sprite(66, game.world.height - 400, 'rogue');
+	game.physics.arcade.enable(player);
+	//player.body.bounce.y = 0.2;
+  player.body.gravity.y = 600;
+  player.body.collideWorldBounds = true;
+	game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON);
+	game.camera.deadzone = new Phaser.Rectangle(0, 0, 240, 768);
+
+	cursors = game.input.keyboard.createCursorKeys();
+
+
+}
+var x=0;
+function update() {
+	var hitPlatform = game.physics.arcade.collide(player, platform);
+	game.physics.arcade.collide(bear, platform);
+
+
+	player.body.velocity.x = 0;
+	if (cursors.left.isDown)
+    {
+        //  Move to the left
+        player.body.velocity.x = -300;
+
+    }
+    else if (cursors.right.isDown)
+    {
+        //  Move to the right
+        player.body.velocity.x = 300;
+
+    }
+		else {
+			player.body.velocity.x = 0;
+		}
+
+
+		if (cursors.up.isDown && hitPlatform)
+    {
+        player.body.velocity.y = -250;
+    }
+
+		if (player.body.position.x>=2290 && x==0) {
+			game.add.sprite(2550, game.world.height - 500, 'cloud');
+			key1 = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+			key1.onDown.add(fak, this);
+
+
+		}
+
+
+}
+var boom;
+function render() {
+
+    //game.debug.cameraInfo(game.camera, 32, 32);
+		//game.debug.spriteCoords(player, 32, 500);
+
+}
+function fak() {
+	bear.animations.play('fak');
+	sleep(2000).then(() => {
+		x = 1;
+		boom = game.add.sprite(1900, 0, 'boom');
+		boom.scale.setTo(10,10);
+		boom.animations.add('boom1');
+		boom.animations.play('boom1');
+		player.anchor.setTo(.9,.5);
+		player.angle -= 100;
+
+
+    explosion.play();
+
+});
+sleep(4000).then(() => {
+game.world.removeAll();
+game.add.sprite(1970, 0, 'don');
+inception.play();
+});
+
+sleep(6000).then(() => {
+game.world.removeAll();
+game.add.sprite(1970, 0, 'love');
+inception.play();
+});
+
+sleep(8000).then(() => {
+game.world.removeAll();
+game.add.sprite(1970, 0, 'life');
+inception.play();
+});
+
+
+
+
+}
+function sleep (time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+</script>
+
+</body>
+</html>
